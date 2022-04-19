@@ -37,10 +37,10 @@ test_dataloader = DataLoader(test_data, batch_size=1, shuffle=True, num_workers=
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print('device:', device)
 ## Model Definition ##
-model = models.resnet18(pretrained=True)
-model.fc = nn.Linear(512, 2)
+model = models.resnet34(pretrained=True)
+model.fc = nn.Linear(512, 128)
 
-model_path = "/home/hjlee/ETH_Spring_2022/IML/Task3/models/0417_165205/model_20.pt"
+model_path = "/home/hjlee/ETH_Spring_2022/IML/Task3/models/0417_165205/model_90.pt"
 model.load_state_dict(torch.load(model_path))
 model.to(device)
 
@@ -49,9 +49,22 @@ model.eval()
 with open('result.txt', 'w') as f:
     with torch.inference_mode():
         for i, (images, _) in tqdm(enumerate(test_dataloader)):
-            images = images.to(device)
-            outputs = model(images)
-            f.write(str(torch.argmax(outputs).item()))
+            img_anchor, img_q1, img_q2 = images
+            img_anchor, img_q1, img_q2 = img_anchor.to(device), img_q1.to(device), img_q2.to(device)
+            
+            embed_anchor = model(img_anchor)
+            embed_q1 = model(img_q1)
+            embed_q2 = model(img_q2)
+
+            q1_norm = torch.norm(embed_anchor - embed_q1)
+            q2_norm = torch.norm(embed_anchor - embed_q2)
+
+            if q1_norm < q2_norm:
+                result = "1"
+            else:
+                result = "0"
+
+            f.write(result)
             f.write('\n')
 
 
