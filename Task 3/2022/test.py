@@ -31,7 +31,7 @@ test_data = Task3ImageDataset(
                     img_dir="/home/hjlee/ETH_Spring_2022/IML/Task3/food",
                     transform=transform)
 
-test_dataloader = DataLoader(test_data, batch_size=1, shuffle=True, num_workers=1)
+test_dataloader = DataLoader(test_data, batch_size=1, shuffle=False, num_workers=1)
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -40,8 +40,8 @@ print('device:', device)
 model = models.resnet34(pretrained=True)
 model.fc = nn.Linear(512, 128)
 
-model_path = "/home/hjlee/ETH_Spring_2022/IML/Task3/models/0417_165205/model_90.pt"
-model.load_state_dict(torch.load(model_path))
+model_path = "/home/hjlee/ETH_Spring_2022/IML/Task3/models/0420_132004/model_15.pt"
+model.load_state_dict(torch.load(model_path, map_location="cuda:0"))
 model.to(device)
 
 model.eval()
@@ -56,8 +56,8 @@ with open('result.txt', 'w') as f:
             embed_q1 = model(img_q1)
             embed_q2 = model(img_q2)
 
-            q1_norm = torch.norm(embed_anchor - embed_q1)
-            q2_norm = torch.norm(embed_anchor - embed_q2)
+            q1_norm = torch.norm(embed_anchor - embed_q1, dim=1)
+            q2_norm = torch.norm(embed_anchor - embed_q2, dim=1)
 
             if q1_norm < q2_norm:
                 result = "1"

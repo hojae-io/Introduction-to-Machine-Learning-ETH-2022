@@ -37,20 +37,13 @@ class Task3ImageDataset(Dataset):
         image1 = read_image(img1_path)
         image2 = read_image(img2_path)
 
-        # switch = random.choice([True, False])
+        switch = random.choice([True, False])
 
         if self.transform:
             image0 = self.transform(image0) # Normalize and resize to (3, 256, 256)
             image1 = self.transform(image1)
             image2 = self.transform(image2)
         
-        # if switch:
-        #     image = torch.cat((image0, image2, image1), 2) # -> [3, 256, 256x3]
-        #     label = 0 # 0: img0 is closer to img2 than to img1
-        # else:
-        #     image = torch.cat((image0, image1, image2), 2)
-        #     label = 1 # 1: img0 is closer to img1 than to img2
-        label = 1
         image = [image0, image1, image2] # image0: anchor, image1: positive, image2: negative
         
-        return image, label
+        return image, switch
